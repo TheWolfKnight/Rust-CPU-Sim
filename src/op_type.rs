@@ -1,8 +1,9 @@
+#![allow(unreachable_patterns)]
 
 use std::fmt;
 
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum OpType {
     NULL,
     SWP,

@@ -3,7 +3,7 @@ use std::fmt;
 use crate::op_type::{ OpType };
 
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct Op {
     typ: OpType,
 }
