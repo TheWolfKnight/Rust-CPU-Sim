@@ -1,32 +1,53 @@
 
-use crate::op::{ Op };
-use crate::op_type::{ OpType };
+use crate::op::{ Op, OpVector };
+use crate::op_type::OpType;
+
+
+#[ derive(Clone, Copy) ]
+pub enum Regestry {
+    Data(u8),
+    Pointer(u32),
+    NULL,
+}
+
+
+impl Regestry {
+    pub fn type_to_string( &self ) -> String {
+        match self {
+            Self::Data(_) => return "Data".to_string(),
+            Self::Pointer(_) => return "Pointer".to_string(),
+            Self::NULL => return "NULL".to_string(),
+        }
+    }
+}
+
 
 pub struct Core {
-    reg_a: u8,
-    reg_b: u8,
-    reg_c: u8,
-    reg_d: u8,
-    op_reg: Vec<Op>,
+    reg_a: Regestry,
+    reg_b: Regestry,
+    reg_c: Regestry,
+    reg_d: Regestry,
+    op_reg: OpVector,
 }
 
 
 impl Core {
-    pub fn new( op_reg: Vec<Op> ) -> Self {
-        Self { reg_a: 0, reg_b: 0, reg_c: 0, reg_d: 0, op_reg }
+    pub fn new( op_reg: OpVector ) -> Self {
+        Self { reg_a: Regestry::NULL, reg_b: Regestry::NULL, reg_c: Regestry::NULL, reg_d: Regestry::NULL, op_reg }
     }
 
     pub fn solve( &mut self ) -> Result<(), String> {
-        for i in 0..self.op_reg.len() {
-            let op: Op = self.op_reg[i];
+        let mut i: usize = 0;
+        while i < self.op_reg.content.len() {
+            let op: Op = self.op_reg.content[i];
             match op.get_type() {
-                OpType::INA(i) => self.change_reg( *i, 'a' ),
-                OpType::INB(i) => self.change_reg( *i, 'b' ),
-                OpType::INC(i) => self.change_reg( *i, 'c' ),
-                OpType::IND(i) => self.change_reg( *i, 'd' ),
-                OpType::NULL => {},
-                OpType::SWP => {
-                    let tmp_a: Result<u8, ()> = self.get_reg( 'a' );
+                OpType::INA(i)      => self.change_reg( *i, 'a' ),
+                OpType::INB(i)      => self.change_reg( *i, 'b' ),
+                OpType::INC(i)      => self.change_reg( *i, 'c' ),
+                OpType::IND(i)      => self.change_reg( *i, 'd' ),
+                OpType::NULL        => {},
+                OpType::SWP         => {
+                    let tmp_a: Result<Regestry, ()> = self.get_reg_consumed( 'a' );
                     match tmp_a {
                         Ok(i) => {
                             self.reg_a = self.reg_b;
@@ -36,16 +57,29 @@ impl Core {
                             return Err( "Cannot swap an empty a registor into the b registor".to_string() );
                         }
                     }
-                }
+                },
+                OpType::CALL        => {
+                    if let Regestry::Data(reg_a_data) = self.reg_a {
+                    } else {
+                        return Err( "An empty a regestry cannot be interpreted as a valid syscall!".to_string() );
+                    }
+                },
+                OpType::PLU(r1, r2) => {},
+                OpType::MIN(r1, r2) => {},
+                OpType::MLT(r1, r2) => {},
+                OpType::DIV(r1, r2) => {},
+                OpType::JMP(i)      => {},
+                OpType::JMPZ(i)     => {},
+                OpType::IFZ         => {},
+                OpType::NOT         => {},
                 _ => todo!()
             }
+            i += 1;
         }
-
         Ok(())
-
     }
 
-    pub fn get_reg( &self, reg_key: char ) -> Result<u8, ()> {
+    fn get_reg_consumed( &self, reg_key: char ) -> Result<Regestry, ()> {
         if reg_key == 'a' {
             return Ok(self.reg_a.clone());
         } else if reg_key == 'b' {
@@ -60,13 +94,13 @@ impl Core {
 
     fn change_reg( &mut self, inpt: u8, reg_key: char ) -> () {
         if reg_key == 'a' {
-            self.reg_a = inpt;
+            self.reg_a = Regestry::Data(inpt);
         } else if reg_key == 'b' {
-            self.reg_b = inpt;
+            self.reg_b = Regestry::Data(inpt);
         } else if reg_key == 'c' {
-            self.reg_c = inpt;
+            self.reg_c = Regestry::Data(inpt);
         } else if reg_key == 'd' {
-            self.reg_d = inpt;
+            self.reg_d = Regestry::Data(inpt);
         }
     }
 

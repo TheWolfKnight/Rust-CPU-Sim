@@ -25,3 +25,17 @@ impl fmt::Display for Op {
     }
 }
 
+
+pub struct OpVector {
+    pub content: Vec<Op>,
+    pub file: String,
+}
+
+
+impl OpVector {
+    pub fn new( content: Vec<Op>, file: String ) -> Self {
+        Self { content, file }
+    }
+
+}
+
