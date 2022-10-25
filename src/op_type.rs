@@ -1,4 +1,5 @@
 #![allow(unreachable_patterns)]
+#![allow(dead_code)]
 
 use std::fmt;
 use crate::core::Regestry;

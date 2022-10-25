@@ -1,4 +1,5 @@
 
+use crate::error::CoreSolveError;
 use crate::op::{ Op, OpVector };
 use crate::op_type::OpType;
 
@@ -28,25 +29,26 @@ pub struct Core {
     reg_c: Regestry,
     reg_d: Regestry,
     op_reg: OpVector,
+    file: String,
 }
 
 
 impl Core {
-    pub fn new( op_reg: OpVector ) -> Self {
-        Self { reg_a: Regestry::NULL, reg_b: Regestry::NULL, reg_c: Regestry::NULL, reg_d: Regestry::NULL, op_reg }
+    pub fn new( op_reg: OpVector, file: String ) -> Self {
+        Self { reg_a: Regestry::NULL, reg_b: Regestry::NULL, reg_c: Regestry::NULL, reg_d: Regestry::NULL, op_reg, file }
     }
 
-    pub fn solve( &mut self ) -> Result<(), String> {
+    pub fn solve( &mut self ) -> Result<(), CoreSolveError> {
         let mut i: usize = 0;
         while i < self.op_reg.content.len() {
             let op: Op = self.op_reg.content[i];
             match op.get_type() {
-                OpType::INA(i)      => self.change_reg( *i, 'a' ),
-                OpType::INB(i)      => self.change_reg( *i, 'b' ),
-                OpType::INC(i)      => self.change_reg( *i, 'c' ),
-                OpType::IND(i)      => self.change_reg( *i, 'd' ),
-                OpType::NULL        => {},
-                OpType::SWP         => {
+                OpType::INA(i) => self.change_reg( *i, 'a' ),
+                OpType::INB(i) => self.change_reg( *i, 'b' ),
+                OpType::INC(i) => self.change_reg( *i, 'c' ),
+                OpType::IND(i) => self.change_reg( *i, 'd' ),
+                OpType::NULL => {},
+                OpType::SWP => {
                     let tmp_a: Result<Regestry, ()> = self.get_reg_consumed( 'a' );
                     match tmp_a {
                         Ok(i) => {
@@ -54,14 +56,14 @@ impl Core {
                             self.reg_b = i;
                         }
                         Err(()) => {
-                            return Err( "Cannot swap an empty a registor into the b registor".to_string() );
+                            return Err( CoreSolveError::new( "Cannot swap an empty a registor into the b registor".to_string(), (*self.file).to_string(), ( i, 0 )) );
                         }
                     }
                 },
                 OpType::CALL        => {
                     if let Regestry::Data(reg_a_data) = self.reg_a {
                     } else {
-                        return Err( "An empty a regestry cannot be interpreted as a valid syscall!".to_string() );
+                        return Err( CoreSolveError::new("An empty a regestry cannot be interpreted as a valid syscall!".to_string(), (*self.file).to_string(), ( i, 0 )) );
                     }
                 },
                 OpType::PLU(r1, r2) => {},

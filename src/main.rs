@@ -23,7 +23,7 @@ fn main() {
     vec_of_ops.push( Op::new( OpType::INB(7) ) );
     vec_of_ops.push( Op::new( OpType::SWP ) );
 
-    let mut core: Core = Core::new( OpVector::new( vec_of_ops, "None".to_string() ) );
-    core.solve();
+    let mut core: Core = Core::new( OpVector::new( vec_of_ops, "None".to_string() ), "NAN".to_string() );
+    let _: Result<(), error::CoreSolveError> = core.solve();
 }
 

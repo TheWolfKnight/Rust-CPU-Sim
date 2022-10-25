@@ -1,21 +1,15 @@
 
 use std::fmt;
 
-
-trait Error {
-    fn new( msg: String, file: String, line: ( u32, u32 ) ) -> Self;
-}
-
-
 pub struct ParseError {
     msg: String,
     file: String,
-    line: ( u32, u32 )
+    line: ( usize, usize )
 }
 
 
-impl Error for ParseError {
-    fn new( msg: String, file: String, line: ( u32, u32 ) ) -> Self {
+impl ParseError {
+    pub fn new( msg: String, file: String, line: ( usize, usize ) ) -> Self {
         Self { msg, file, line }
     }
 }
@@ -35,16 +29,16 @@ pub struct CoreSolveError {
 }
 
 
-impl Error for CoreSolveError {
-    fn new( msg: String, file: String, op_index, usize ) -> Self {
-        Self { msg, file, op_index }
+impl CoreSolveError {
+    pub fn new( msg: String, file: String, line: ( usize, usize ) ) -> Self {
+        Self { msg, file, op_index: line.0 }
     }
 }
 
 
 impl fmt::Display for CoreSolveError {
     fn fmt( &self, f: &mut fmt::Formatter ) -> fmt::Result {
-        write!("{}:{}:0: {}", self.file, self.op_index, self.msg)
+        write!( f, "{}:{}:0: {}", self.file, self.op_index, self.msg)
     }
 }
 
